@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Api from "../Api";
 import { useHistory } from "react-router-dom";
+import {useParams} from "react-router-dom";
 
 function SectionForm() {
+    const {id} = useParams();
     const history = useHistory();
     const [section, setSection] = useState({
         name: '',
         slug: '',
         position: 0
     });
+
+    useEffect(function(){
+        if(id){
+            Api.sections.get(id).then((response) => setSection(response.data))
+
+        }
+
+    }, []);
 
     function onChange(event) {
         const newSection = { ...section };
@@ -19,7 +29,11 @@ function SectionForm() {
     async function onSubmit(event) {
         event.preventDefault();
         try {
-            await Api.sections.create(section);
+            if(id){
+                await Api.sections.update(id, section);
+            } else {
+                await Api.sections.create(section);
+            }
             history.push('/sections');
 
         } catch (error) {
@@ -30,8 +44,7 @@ function SectionForm() {
     return (
         <main className="container">
             <h1>Section Form</h1>
-            <form onSubmit={onSubmit}></form>
-            <form>
+            <form onSubmit={onSubmit}>
                 <div className="mb-3">
                     <label className="form-label">Name</label>
                     <input className="form-control" type="text" name="name" value={section.name} onChange={onChange} />

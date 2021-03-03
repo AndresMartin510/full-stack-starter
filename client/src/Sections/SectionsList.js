@@ -1,25 +1,39 @@
 import Api from '../Api';
-import {useEffect, useState} from 'react';
-import {Link} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 function SectionsList() {
 
-const [sections, setSections] = useState([]);
+    const [sections, setSections] = useState([]);
 
-useEffect(function(){
-    Api.sections.index().then(response => setSections(response.data));
-   }   ,[]);
+    useEffect(function () {
+        Api.sections.index().then(response => setSections(response.data));
+    }, []);
 
-    return(
-    <main className="container">
-<h1>Sections List</h1>
-<Link className="btn btn-primary" to="/sections/new">New</Link>
-<ul>
-{sections.map(s => (
-<li>{s.name}, {s.slug}, {s.position}</li>))}
-</ul>
-</main>
+    function onDelete(section) {
+        if(window.confirm(`Are you sure you wish to delete ${section.name}?`)){
+            // execute code to delete section
+            Api.sections.delete(section.id).then(function(){
+                const newSections = sections.filter(s => s.id !== section.id);
+                setSections(newSections);
+            })
+        }
+    }
 
-);
+    return (
+        <main className="container">
+            <h1>Sections List</h1>
+            <Link className="btn btn-primary" to="/sections/new">New</Link>
+            <ul>
+                {sections.map(s => (
+                    <li>
+                        <p><Link to={`/sections/${s.id}/edit`}>{s.name}, {s.slug}, {s.position}</Link></p>
+                        <p><button onClick={() => onDelete(s)} type="button" className="btn btn-sm btn-danger">Delete</button></p>
+                    </li>
+                    ))}
+            </ul>
+        </main>
+
+    );
 
 }
 export default SectionsList;
